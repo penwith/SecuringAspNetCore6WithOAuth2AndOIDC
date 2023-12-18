@@ -1,6 +1,6 @@
 # Securing ASP.NET Core 6 with OAuth2 and OpenID Connect
 
-## Setting Up Identity Server
+## 3.1 - Setting Up Identity Server
 
 ```
 > dotnet new isempty -n Marvin.IDP
@@ -16,7 +16,7 @@ Running the IDP project auto-generates a key that it can then use to signe token
 
 TODO : Check out key replacement in final chapter.
 
-## Adding a User Interface
+## 3.2 - Adding a User Interface
 
 ASP.NET Core Razor pages, views and models
 
@@ -29,3 +29,15 @@ This adds required pages to the Marvin.IDP project.
 Need to add configuration in HostingExtensions.
 
 Solution did not build as the Account Create index page was referencing a non-existant CreateUser method. Have commented this out for now.
+
+## 3.3 - Adding Users to Test With
+
+SubjectId is the users unique identifier and must be unique at the level of the IDP.
+
+Claims are related to Scopes, so there is setup required in the Config class add profile scope:
+
+```
+new IdentityResources.Profile()
+```
+
+This enables support for this scope across the full identity provider. See IdentityModel.JwtClaimTypes
