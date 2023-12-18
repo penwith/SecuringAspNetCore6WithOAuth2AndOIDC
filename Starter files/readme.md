@@ -135,3 +135,32 @@ public static bool AutomaticRedirectAfterSignOut = true;
 ```
 
 ## 4.5 - Returning Additional Claims
+
+By default, IdentityServer does not include identity claims, save for the user identifier, in the identity token. 
+
+We could allow this by setting the AlwaysIncludeUserClaimsInIdToken property to true when configuring a client, but we don't want to do that. 
+
+There's two main reasons for this. 
+
+One, in some flows or variations of flows the identity token can be returned from the authorization endpoint directly. If a set of claims are included in that token, it becomes bigger, potentially resulting in URI length limits. These are dependent on the browser, and that is not a good place to be. Most modern browsers don't have issues with long URIs anymore, but older browsers still do. So, it still is something to keep in mind. Moreover, you don't know in advance which hubs, proxies, caches, and/or servers your requests and responses will pass through between your client app and your identity provider. It's not unrealistic that one of those won't play nice with long URIs. 
+
+And two, identity tokens are sometimes passed around. For example, when ending a session or in some federation‑related scenario. That increases the chance of an attacker getting ahold of it; therefore, the less information that's in there, the better. Not including claims in the identity token that aren't required is thus the prefered approach. But how do we get access to those claims then? 
+
+Well, we learned about the token endpoint and the authorization endpoint at level of the IDP, but there's another one, the UserInfo endpoint. 
+
+This is an endpoint the client application can call to get additional information on the user. Calling this endpoint requires an access token with scopes that relate to the claims that have to be returned. So, if we want profile information from the UserInfo endpoint, the access token must contain the profile scope. 
+
+It is a bit too early to dive into access tokens in this part of the course, so for now it's sufficient to know that our OpenID Connect middleware needs one to call that UserInfo endpoint. 
+
+Other tokens can be returned from this endpoint as well, access tokens and refresh tokens, for example. So, in reality, with our current flow an access token is returned next to that identity token. It is delivered to the client, so the middleware now has access to it. In the next step, after having validated the identity token, the middleware sends a request to the UserInfo endpoint, passing through the access token. At that level, the access token is validated and the UserInfo endpoint returns the user's claims that are related to the scopes in the access token. 
+
+Typically, those user claims are then added to the claims identity, so there's easy access to them throughout the application. 
+
+In the client we set GetClaimsFromUserInfoEndpoint to true:
+
+```
+options.GetClaimsFromUserInfoEndpoint = true;
+```
+
+This does not set the claims in the token, so is this an alternative to requiring an access token? Can our API just take an Indentoty token and hit the user info endpoint for the claim? Probably, but this is probably not best practice.
+

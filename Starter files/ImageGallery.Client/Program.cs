@@ -41,6 +41,7 @@ builder.Services.AddAuthentication(options =>
         // To change, set SignedOutCallbackPath
         // eg: options.SignedOutCallbackPath = new PathString("pathaftersignout");
         options.SaveTokens = true;
+        options.GetClaimsFromUserInfoEndpoint = true;
     });
 
 var app = builder.Build();
