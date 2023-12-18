@@ -44,6 +44,8 @@ This enables support for this scope across the full identity provider. See Ident
 
 ## 4.1 - Configuring IndentityServer to log in with the Authorization flow
 
+PKCE Protection is enabled by default.
+
 Add a client with the required grant types, in this case the 'code' flow. This flow delivers to the browser via URI redirection, so you must specify a valid URI that the client is able to receive tokens on.
 
 /signin-oidc - this can be configured on the web client, but this is the default value.
@@ -110,4 +112,11 @@ One small variation I'd like to point out is the optional inclusion of a consent
 
 Here we can set RequireConsent to true. By default, this value is false. Let's see what gives. We're navigating to the web client, which redirects to the identity provider, I log in again, and we see a consent screen here. Anyway, here we can check whether or not we want to allow the client application access to some of our information, and this should look quite familiar because if you've ever clicked a Login with Facebook button on a website, you should have seen something familiar. However, mostly for internal applications or applications that are completely under your control, this screen is not shown. I'm going to leave it on, though, because it makes it a bit easier to see what's going on once we start requesting additional scopes. Let's allow this, and we hit our Index action again, meaning we're authenticated.
 
-## 4.3 - 
+## 4.3 - Logging out of Our Web Application
+
+Remember to log out of the identity provider as well as locally
+
+Should add a redirect, so...
+
+## 4.4 - Redirecting After Logging Out
+
