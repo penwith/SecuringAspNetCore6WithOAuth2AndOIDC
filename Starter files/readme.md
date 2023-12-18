@@ -120,3 +120,18 @@ Should add a redirect, so...
 
 ## 4.4 - Redirecting After Logging Out
 
+host:port/signout-callback-oidc is the default so you don't have to register this on the client, but you do need to register it on the IDP. Add the following to the Client config on the IDP:
+
+```
+PostLogoutRedirectUris =
+{
+    "https://localhost:7184/signout-callback-oidc"
+}
+```
+This will give you a link back to the client app. To automatically redirect update the LogoutOptions class:
+
+```
+public static bool AutomaticRedirectAfterSignOut = true;
+```
+
+## 4.5 - Returning Additional Claims
