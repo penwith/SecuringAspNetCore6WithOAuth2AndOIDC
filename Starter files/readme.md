@@ -41,3 +41,13 @@ new IdentityResources.Profile()
 ```
 
 This enables support for this scope across the full identity provider. See IdentityModel.JwtClaimTypes
+
+## 4.1 - Configuring IndentityServer to log in with the Authorization flow
+
+Add a client with the required grant types, in this case the 'code' flow. This flow delivers to the browser via URI redirection, so you must specify a valid URI that the client is able to receive tokens on.
+
+/signin-oidc - this can be configured on the web client.
+
+We also need to configure the scopes that can be requested by the client.
+
+And lastly a client secret for client authentication to allow the client application to execute an authenticated call to the token endpoint.
