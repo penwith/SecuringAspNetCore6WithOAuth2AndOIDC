@@ -317,6 +317,104 @@ Add routing in the for the access denied page:
 })
 ```
 
+## Chapter 6 - Understanding Authorization with OAuth2 and OpenID Connect
+
+### Learning How OAuth2 Works
+
+OAuth 2 is intended for authorization or delegated authorization to be exact. 
+
+In other words, authorizing access to resources like an API. 
+
+In those scenarios, a client application would request an access token from an authorization server. Let's assume that we're talking about letting a user decide on access. In other words, not just machine-to-machine communication.
+
+A user is involved in this example. A client application starts the flow. This redirects the user to the authorization server. 
+
+Here, as we know by now, users prove who they are, for example, by providing a username and password. 
+
+From this moment on, the authorization server knows who the user is. It can create an access token and sign it.  
+
+The access token is eventually returned from the token endpoint and it represents consent given by the user to the client application to access data the user owns. 
+
+For example, resource is exposed by the API, client application stores this token, and sends it as a bearer token on each request to the API. 
+
+** At the level of the API, the access token is validated and access to the resources can be granted or refused.**
+
+That's the high-level picture, but I've mentioned a few times already that OpenID Connect is a superior protocol. It is an extension of OAuth 2. 
+
+Even if only access tokens are required, you are often using OpenID Connect without even realizing it. 
+
+It standardized additional claims and verification methods even for flows that don't require an identity token. So from that point of view, you could say that you're using OpenID Connect for both authentication and authorization, even though you will still encounter people who prefer to talk about OAuth 2 when only authorization is required. 
+
+### Using OpenID Connect for Authentication and Authorization
+
+So we have a client application that requires authentication at client level and authorization to talk to an API. 
+
+The client application creates an authentication request. This redirects the user to the identity provider. 
+
+As you notice, we're again talking about an identity provider, instead of an authorization server. 
+
+In this case, the identity provider includes the functionality of an authorization server, as is often the case. 
+
+Here, users prove who they are, for example, by providing a username and password. 
+
+The IDP now knows who the user is, and what happens next depends on the flow that's being used as we know by now. 
+
+Important is that, eventually, the client application will receive both an identity and an access token.
+
+The identity token is validated and used as proof of identity. 
+
+With this, we sign into the client app. 
+
+The access token is stored by the client application. 
+
+On each request to the API, it is sent as a bearer token. 
+
+There is a limited form of validation going on that uses the access token like creating a hash from the token to check if it matches the at_hash value of the identity token. 
+
+** Yet, the actual place for validation of the access token is the API.**
+
+So at the level of the API, the access token is validated, and access to resources can potentially be granted. 
+
+### OAuth2 and OpenID Connect Flows
+
+The OIDC authorization code flow and implicit flow are extensions to the two flows from the OAuth 2 standard. 
+
+So these still exist. 
+
+The three variations of the hybrid flow only exist in OpenID Connect. There was no and is no hybrid flow in OAuth 2.
+
+But as we know, hybrid and implicit are no longer best practice flows. If we can, we don't use them anymore. 
+
+Next to that, OAuth 2 also supports 2 other flows, those are flows that don't exist in OpenID Connect. 
+
+One of these is the **resource owner password credentials flow.**
+
+This is the only flow that allows an in-application login screen. The user isn't redirected to the identity provider to provide credentials. Instead, typically, a username and password field are included in your client application. 
+
+So this is something a lot of people are actually looking for because they want to have those input fields for username and password in their client application, but it was only added to OAuth 2 for legacy reasons, and it **should only be used by trusted applications.**
+
+As we learned, these days we really don't want to use in-app login screens anymore. 
+
+Checking credentials and so on should not be the responsibility of a client app. 
+
+Moreover, this is not a redirection-based flow, which will make integrating with other identity providers through federation impossible. 
+
+It makes single sign-on scenarios harder and so on. Most of these are a requirement for enterprise applications. 
+
+As it doesn't exist in OpenID Connect, using it would mean there is no identity token, and we can also not link an access token to such a verifiable identity token, so this one should be avoided. 
+
+The other flow that is supported is the **client credentials flow**. As the name implies, this flow only uses client authentication. 
+
+In other words, typically, the client ID and the client secret. 
+
+These are then exchanged for an access token. 
+
+For that reason, it should only be used by confidential applications. 
+
+It's also not part of OpenID Connect as OpenID Connect includes a user authentication step, and in this flow, there is no user. 
+
+So this flow can be very useful **when you require machine-to-machine communication without user involvement.**
+
 ## 7.1 - Securing Access to Your API
 
 ## 7.2 - Passing an Access Token to Your API
