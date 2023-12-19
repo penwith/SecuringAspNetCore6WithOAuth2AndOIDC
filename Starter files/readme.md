@@ -180,6 +180,99 @@ options.ClaimActions.DeleteClaim("idp");
 
 ## 5.3 - Role-based Authorization: Ensuring the Role Is Included
 
+We extended the in-memory user and gave them a new claim
+
+```
+new Claim("role", "FreeUser")
+
+```
+
+Create a new identity scope
+
+```
+public static IEnumerable<IdentityResource> IdentityResources =>
+    new IdentityResource[]
+    { 
+        new IdentityResources.OpenId(),
+        new IdentityResources.Profile(),
+        new IdentityResource("role", "Your role(s)")
+    };
+```
+
+Give it 
+- a name that matches the new claim name
+- a display name (to be displayed on consent screen)
+- a list of claims that must be returned an application asks for this role scope.
+
+To enable the client application to request the role scope, we have to explicitly allow this, so we add roles to the AllowedScopes list on the IDP:
+
+```
+public static IEnumerable<Client> Clients =>
+    new Client[]
+    {
+        new Client()
+        {
+            ClientName = "Image Gallery",
+            ClientId = "imagegalleryclient",
+            AllowedGrantTypes = GrantTypes.Code,
+            RedirectUris =
+            {
+                "https://localhost:7184/signin-oidc"
+            },
+            PostLogoutRedirectUris =
+            {
+                "https://localhost:7184/signout-callback-oidc"
+            },
+            AllowedScopes =
+            {
+                IdentityServerConstants.StandardScopes.OpenId,
+                IdentityServerConstants.StandardScopes.Profile,
+                "roles"
+            },
+            ClientSecrets =
+            {
+                new Secret("secret".Sha256())
+            },
+            RequireConsent = true
+        }
+    };
+```
+
+The client app the requests the role scope and adds a mapping for the role. As the user might be in multiple roles we should not MapUniqueJsonKey, but insead use MapJsonKey:
+
+```
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+    })
+    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
+    {
+        options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.Authority = "https://localhost:5001";
+        options.ClientId = "imagegalleryclient";
+        options.ClientSecret = "secret";
+        options.ResponseType = "code";
+        //options.Scope.Add("openid");
+        //options.Scope.Add("profile");
+        //options.CallbackPath = new PathString("signin-oidc");
+        // SignedOutCallbackPath: default = host:port/signout-callback-oidc.
+        // Must match with the post logout redirect URI at IDP client config if
+        // you want to automatically return to the application after logging out
+        // of IdentityServer.
+        // To change, set SignedOutCallbackPath
+        // eg: options.SignedOutCallbackPath = new PathString("pathaftersignout");
+        options.SaveTokens = true;
+        options.GetClaimsFromUserInfoEndpoint = true;
+        options.ClaimActions.Remove("aud"); // Call remove to ADD this to the collection!!!
+        options.ClaimActions.DeleteClaim("sid");
+        options.ClaimActions.DeleteClaim("idp");
+        options.Scope.Add("roles");
+        options.ClaimActions.MapJsonKey("role", "role");
+    });
+```
+
 ## 5.4 - Role-based Authorization: Using the Role in Your Views
 
 ## 5.5 - Role-based Authorization: Using the Role in Your Controllers

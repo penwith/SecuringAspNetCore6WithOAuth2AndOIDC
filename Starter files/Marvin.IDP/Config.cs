@@ -10,7 +10,8 @@ public static class Config
         new IdentityResource[]
         { 
             new IdentityResources.OpenId(),
-            new IdentityResources.Profile()
+            new IdentityResources.Profile(),
+            new IdentityResource("roles", "Your role(s)", new []{ "role" })
         };
 
     // map to apis
@@ -38,7 +39,8 @@ public static class Config
                 AllowedScopes =
                 {
                     IdentityServerConstants.StandardScopes.OpenId,
-                    IdentityServerConstants.StandardScopes.Profile
+                    IdentityServerConstants.StandardScopes.Profile,
+                    "roles"
                 },
                 ClientSecrets =
                 {

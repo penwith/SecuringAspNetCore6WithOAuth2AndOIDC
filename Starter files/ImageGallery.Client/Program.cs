@@ -49,6 +49,8 @@ builder.Services.AddAuthentication(options =>
         options.ClaimActions.Remove("aud"); // Call remove to ADD this to the collection!!!
         options.ClaimActions.DeleteClaim("sid");
         options.ClaimActions.DeleteClaim("idp");
+        options.Scope.Add("roles");
+        options.ClaimActions.MapJsonKey("role", "role");
     });
 
 var app = builder.Build();
