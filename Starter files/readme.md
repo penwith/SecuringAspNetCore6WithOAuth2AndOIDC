@@ -622,9 +622,45 @@ Make sure that the images controller (on the API) actually requires authorizatio
 public class ImagesController : ControllerBase
 ```
 
-At this point the Client App is no longer allowed access to the API. The give the client access to the API again check out the next commit.
+At this point the Client App is no longer allowed access to the API. The give the client access to the API again we need to pass that access token to the API on each request. Check out the next commit.
 
 ## 7.2 - Passing an Access Token to Your API
+
+The token should be passed on each request as a Bearer token. There are a number of ways to do this:
+
+We can get the token from our context and manually add it as a bearer token, but we would have to add code to add that access token in every place we use our API.
+
+We can create a custom delegating handler that is responsible for adding the access token on outgoing requests.
+
+There is a popular package - *Identity.AspNetCore* - which contains such a handler. Apparently created by the people who created IdentityServer. 
+
+In the client setup, to register the required services for access token management:
+
+```
+builder.Services.AddAccessTokenManagement();
+```
+
+Then add a call into AddUserAccessTokenHandler when configuring the API Client, to ensure the access token is passed on each request:
+
+```
+builder.Services.AddHttpClient("APIClient", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ImageGalleryAPIRoot"]);
+    client.DefaultRequestHeaders.Clear();
+    client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
+})
+    .AddUserAccessTokenHandler();
+```
+
+Add some logging for visibility:
+
+```
+var accessToken = await HttpContext
+    .GetTokenAsync(OpenIdConnectParameterNames.AccessToken);
+
+_logger.LogInformation($"Access token: " +
+                    $"\n{accessToken}");
+```
 
 ## 7.3 - Using Access Token Claims When Getting Resources
 
