@@ -170,6 +170,14 @@ Default claim types don't make much sense any more. Keep your original claim typ
 
 ## 5.2 - Claims Transformation: Manipulating the Claims Collection
 
+Remove claims that you don't need. Add ones that you do.
+
+```
+options.ClaimActions.Remove("aud"); // Call remove to ADD this to the collection!!!
+options.ClaimActions.DeleteClaim("sid");
+options.ClaimActions.DeleteClaim("idp");
+```
+
 ## 5.3 - Role-based Authorization: Ensuring the Role Is Included
 
 ## 5.4 - Role-based Authorization: Using the Role in Your Views

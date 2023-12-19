@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,6 +46,9 @@ builder.Services.AddAuthentication(options =>
         // eg: options.SignedOutCallbackPath = new PathString("pathaftersignout");
         options.SaveTokens = true;
         options.GetClaimsFromUserInfoEndpoint = true;
+        options.ClaimActions.Remove("aud"); // Call remove to ADD this to the collection!!!
+        options.ClaimActions.DeleteClaim("sid");
+        options.ClaimActions.DeleteClaim("idp");
     });
 
 var app = builder.Build();
