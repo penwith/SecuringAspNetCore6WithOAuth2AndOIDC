@@ -20,7 +20,7 @@ public class TestUsers
             {
                 new TestUser
                 {
-                    SubjectId = "b0fc0e95-d82f-4202-805f-c58f246b4c5c",
+                    SubjectId = "d860efca-22d9-47fd-8249-791ba61b07c7",
                     Username = "David",
                     Password = "password",
                     Claims =
@@ -32,7 +32,7 @@ public class TestUsers
                 },
                 new TestUser
                 {
-                    SubjectId = "bd4fc564-0705-41ee-af66-4cf5ad201dcd",
+                    SubjectId = "b7539694-97e7-4dfe-84da-b4256e1ff5c7",
                     Username = "Emma",
                     Password = "password",
                     Claims =

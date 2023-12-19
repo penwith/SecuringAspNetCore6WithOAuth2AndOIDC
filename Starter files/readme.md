@@ -664,6 +664,42 @@ _logger.LogInformation($"Access token: " +
 
 ## 7.3 - Using Access Token Claims When Getting Resources
 
+How do we know who the current user is?
+
+On the Client, User.Identity (on the controller) is a Claims identity coming from the identity token.
+
+On the API there is a user object as well. It is the same ControllerBase class that we are working with. This time the Claims identity is constructed from the access token.
+
+In the ImagesController.GetImages endpoint:
+
+```
+var ownerId = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+
+if (ownerId == null)
+{
+    throw new Exception("User identifier is missing from token");
+}
+```
+
+In this demo we are restricting the images returned to those owned by the user, so we pass the id to the repo
+
+```
+var imagesFromRepo = await _galleryRepository.GetImagesAsync(ownerId);
+```
+
+and use it to filter the results returned from the database
+
+```
+public async Task<IEnumerable<Image>> GetImagesAsync(string ownerId)
+{
+    return await _context.Images
+        .Where( (i => i.OwnerId == ownerId))
+        .OrderBy(i => i.Title).ToListAsync();
+}
+```
+
+**We can used access policies to block access to the controllers completely**
+
 ## 7.4 - Including Identity Claims in an Access Token
 
 ## 7.5 - Protecting the API When Creating a Resource (with Roles)
