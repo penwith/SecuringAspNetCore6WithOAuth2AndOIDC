@@ -134,7 +134,7 @@ This will give you a link back to the client app. To automatically redirect upda
 public static bool AutomaticRedirectAfterSignOut = true;
 ```
 
-## 4.5 - Returning Additional Claims
+## 4.5 - Returning Additional Claims From the UserInfo Endpoint
 
 By default, IdentityServer does not include identity claims, save for the user identifier, in the identity token. 
 
@@ -164,3 +164,64 @@ options.GetClaimsFromUserInfoEndpoint = true;
 
 This does not set the claims in the token, so is this an alternative to requiring an access token? Can our API just take an Indentoty token and hit the user info endpoint for the claim? Probably, but this is probably not best practice.
 
+## 5.1 - Claims Transformation: Keeping the Original Claim Types
+
+Default claim types don't make much sense any more. Keep your original claim types by clearing the default inbound claim type map.
+
+## 5.2 - Claims Transformation: Manipulating the Claims Collection
+
+## 5.3 - Role-based Authorization: Ensuring the Role Is Included
+
+## 5.4 - Role-based Authorization: Using the Role in Your Views
+
+## 5.5 - Role-based Authorization: Using the Role in Your Controllers
+
+## 5.6 - Creating an Access Denied Page
+
+## 7.1 - Securing Access to Your API
+
+## 7.2 - Passing an Access Token to Your API
+
+## 7.3 - Using Access Token Claims When Getting Resources
+
+## 7.4 - Including Identity Claims in an Access Token
+
+## 7.5 - Protecting the API When Creating a Resource (with Roles)
+
+## 8.1 - Creating an Authorization Policy
+
+## 8.2 - Using an Authorization Policy (Web Client)
+
+## 8.3 - Using an Authorization Policy (API)
+
+## 8.4 - Fine-grained Policies with Scopes
+
+## 8.5 - Creating Custom Requirements and Handlers
+
+## 9.1 - Token Lifetimes and Expiration
+
+## 9.2 - Gaining Long-lived Access
+
+## 9.3 - Working with Reference Tokens
+
+## 9.4 - Revoking Tokens
+
+## 10.1 - Creating a User Database
+
+## 10.2 - Inspecting UI Interaction with IdentityServer
+
+## 10.3 - Inspecting the User Service
+
+## 10.4 - Integrating IdentityServer with a Custom User Database
+
+## 10.5 - Building Your Identity with a Profile Service
+
+## 12.1 - Enabling Windows Authentication on IIS Express
+
+## 12.2 - Integrating Windows Authentication with IdentityServer
+
+## 12.3 - Inspecting Support for Federating with a Third-party Identity Provider
+
+## 12.4 - Registering an Application on Azure AD
+
+## 12.5 - Integrating with Azure AD
