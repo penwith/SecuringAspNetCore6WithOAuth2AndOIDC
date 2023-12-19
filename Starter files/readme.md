@@ -702,6 +702,19 @@ public async Task<IEnumerable<Image>> GetImagesAsync(string ownerId)
 
 ## 7.4 - Including Identity Claims in an Access Token
 
+On the IDP we can use a different constructor when creating an api resource to specify a list of claims that have to be returned when requesting the related scope.
+
+```
+public static IEnumerable<ApiResource> ApiResources =>
+    new ApiResource[]
+    {
+        new ApiResource("imagegalleryapi", "Image Gallery API", new []{ "role" })
+        {
+            Scopes = { "imagegalleryapi.fullaccess" }
+        }
+    };
+```
+
 ## 7.5 - Protecting the API When Creating a Resource (with Roles)
 
 ## 8.1 - Creating an Authorization Policy
