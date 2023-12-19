@@ -308,6 +308,15 @@ public async Task<IActionResult> AddImage(AddImageViewModel addImageViewModel)
 
 ## 5.6 - Creating an Access Denied Page
 
+Add routing in the for the access denied page:
+
+```
+.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+{
+    options.AccessDeniedPath = "/Authentication/AccessDenied";
+})
+```
+
 ## 7.1 - Securing Access to Your API
 
 ## 7.2 - Passing an Access Token to Your API
