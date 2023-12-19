@@ -717,6 +717,29 @@ public static IEnumerable<ApiResource> ApiResources =>
 
 ## 7.5 - Protecting the API When Creating a Resource (with Roles)
 
+Add the auth attribute as before
+
+```
+[HttpPost()]
+[Authorize(Roles = "PayingUser")]
+public async Task<ActionResult<Image>> CreateImage([FromBody] ImageForCreation imageForCreation)
+```
+
+Get the owner id from claims, as before, and update the entity
+
+```
+var ownerId = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+
+if (ownerId == null)
+{
+    throw new Exception("User identifier is missing from token");
+}
+
+imageEntity.OwnerId = ownerId;
+```
+
+The owner id is validated and secured. Don't take values like this from your model which can be tampered with.
+
 ## 8.1 - Creating an Authorization Policy
 
 ## 8.2 - Using an Authorization Policy (Web Client)
