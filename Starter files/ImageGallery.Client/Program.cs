@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -51,6 +52,11 @@ builder.Services.AddAuthentication(options =>
         options.ClaimActions.DeleteClaim("idp");
         options.Scope.Add("roles");
         options.ClaimActions.MapJsonKey("role", "role");
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            NameClaimType = "given_name",
+            RoleClaimType = "role"
+        };
     });
 
 var app = builder.Build();

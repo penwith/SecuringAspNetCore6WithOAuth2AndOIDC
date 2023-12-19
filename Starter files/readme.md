@@ -275,6 +275,16 @@ builder.Services.AddAuthentication(options =>
 
 ## 5.4 - Role-based Authorization: Using the Role in Your Views
 
+Tell the framework where to find the user's role. TokenValidationParameters allows us to specify the name claim and role claim types as well as detailing how to validate the token:
+
+```
+options.TokenValidationParameters = new TokenValidationParameters
+{
+    NameClaimType = "given_name",
+    RoleClaimType = "role"
+};
+```
+
 ## 5.5 - Role-based Authorization: Using the Role in Your Controllers
 
 ## 5.6 - Creating an Access Denied Page
