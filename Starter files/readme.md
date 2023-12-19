@@ -417,6 +417,213 @@ So this flow can be very useful **when you require machine-to-machine communicat
 
 ## 7.1 - Securing Access to Your API
 
+Add support for an additional scope. We will require an access token with that scope in it before we allow access to the API:
+
+```
+public static IEnumerable<ApiResource> ApiResources =>
+    new ApiResource[]
+    {
+        new ApiResource("imagegalleryapi", "Image Gallery API")
+    };
+```
+
+and
+
+```
+public static IEnumerable<Client> Clients =>
+    new Client[]
+    {
+        new Client()
+        {
+            .
+            .
+            AllowedScopes =
+            {
+                IdentityServerConstants.StandardScopes.OpenId,
+                IdentityServerConstants.StandardScopes.Profile,
+                "roles",
+                "imagegalleryapi"
+            },
+            .
+            .
+        }
+    };
+```
+
+and in the hosting extensions
+
+```
+.AddInMemoryApiResources(Config.ApiResources)
+```
+
+### So, API Scopes vs API Resources
+
+The scope concept is pretty old. 
+
+It's coming from the OAuth 2 specification, and it simply means the scope of access that is requested by a client. 
+
+So, you could have a read scope, which would allow a client access to read resources at level of the API, a write scope, which would allow access to write certain resources, and so on. 
+
+It's up to us, at the level of the API, to read out these scopes and use them to allow or disallow certain things. 
+
+So that is a simple approach, but it's often not sufficient. 
+
+Resource is another concept that allows for more complex structures. 
+
+You can look at the resource as a physical or logical API. 
+
+In our case, the imagegallery/api is a resource. In more complex systems, you may have multiple physical APIs, which can all be different resources, or you might decide to split up your one physical API into different logical APIs, all with their own resource name, for example, an employee API, a customer API, and so on. 
+
+These resources can have scopes, which can be used for more fine-grained authorization rules inside of the API. 
+
+For example, our imagegallery/api resource can have an imagegallery.read, and imagegallery.write scope. 
+
+So this allows more flexibility. Also, it's not hard to imagine that different client applications that need access to our imagegallery/api are allowed different levels of access inside of that API. 
+
+We could, for example, give our imagegallery web client access to the imagegallery.read and imagegallery.write scopes, but give a yet-to-be-developed mobile imagegallery client only access to the imagegallery.read scope. 
+
+Whenever a scope related to a resource is requested by a client application, ***the access token*** will contain the resource as an audience value, and the scope will be in the scopes list. 
+
+So, if our web client would request imagegallery/api.read, and imagegallery/api.write scopes, we would end up with an access token with imagegallery/api in the audience list, and imagegallery/api.read and imagegallery/api.write in the scopes list. 
+
+If a mobile client requests imagegallery/api.read, we would end up with a token with imagegallery/api in the audience list and imagegallery/api.read in the scopes list. 
+
+And like that, you can use these scopes to build a fine-grained authorization layer for your API. 
+
+For our current demo, we will keep things simple. We'll create one scope, imagegallery/api.fullaccess, linked to our imagegallery/api resource. 
+
+We will only use the audience value for now. In the next module, we will dive deeper into authorization. There, we will extend our example with different scopes and policies that effectively use these scopes.
+
+### Back to the code
+
+Define the scope
+
+```
+public static IEnumerable<ApiScope> ApiScopes =>
+    new ApiScope[]
+    {
+        new ApiScope("imagegalleryapi.fullaccess")
+    };
+```
+
+And then add this scope to the resource:
+
+```
+public static IEnumerable<ApiResource> ApiResources =>
+    new ApiResource[]
+    {
+        new ApiResource("imagegalleryapi", "Image Gallery API")
+        {
+            Scopes = { "imagegalleryapi.fullaccess" }
+        }
+    };
+```
+
+Then ensure the Allowed Scopes list in the client configuration (of the IDP) contains the resource, to enable the client to request it:
+
+```
+    public static IEnumerable<Client> Clients =>
+        new Client[]
+        {
+            new Client()
+            {
+                .
+                .
+                AllowedScopes =
+                {
+                    IdentityServerConstants.StandardScopes.OpenId,
+                    IdentityServerConstants.StandardScopes.Profile,
+                    "roles",
+                    "imagegalleryapi.fullaccess"
+                },
+                .
+                .
+            }
+        }
+```
+
+Then in the Web Client, **bearing in mind that we are *already* getting an access token through the back channel**, to ensure we get an access token with this scope included add the scope to the requested list of scopes:
+
+```
+builder.Services.AddAuthentication(options =>
+    .
+    .
+    .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
+    {
+        .
+        .
+        options.Scope.Add("roles");
+        options.Scope.Add("imagegalleryapi.fullaccess");
+        .
+        .
+    });
+```
+
+And then to secure the API, that is make it require an access token: 
+
+First add the *Microsoft.AspNetCore.Authentication.JwtBearer* package to your project.
+
+Then in the program class for the API, configure the JWT bearer middleware:
+
+```
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = "https://localhost:5001";
+        options.Audience = "imagegalleryapi";
+    });
+```
+
+Authority is the address of our identity provider. The middleare uses this to load metadata so it knows about the endpoints and keys. When this middleware runs for the first time it will read that metadata from the IDP and the cache the result.
+
+This middleware is also responsible for validating the access tokens.
+
+As a valid value for the Audience property, we pass through *imagegalleryapi*. This make sure that imagegalleryapi is checked as an audience value in the token.
+
+We can also check the type header of the token to avoid JWT confusion attacks, which allows attackers to circumvent token signature checking.
+
+```
+options.TokenValidationParameters.ValidTypes = new[] { "at+jwt" };
+```
+
+Stating that the only ValidType we want to accept should have at+jwt as type.
+
+Then to ensure that the incoming claims and validation on those claims are mapped and is executed the same way as on our client:
+
+Clear the default inbound claim type map
+
+```
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+```
+
+And when setting up the Token Validation Parameters, state the name and role claim types:
+
+```
+options.TokenValidationParameters = new()
+{
+    NameClaimType = "given_name",
+    RoleClaimType = "role",
+    ValidTypes = new[] { "at+jwt" }
+};
+```
+
+Add the authentication middleware to the request pipeline before the middleware request to map controllers, so that we can check if API access is allowed before the request is passed through:
+
+```
+app.UseAuthentication();
+```
+
+Make sure that the images controller (on the API) actually requires authorization:
+
+```
+[Route("api/images")]
+[ApiController]
+[Authorize]
+public class ImagesController : ControllerBase
+```
+
+At this point the Client App is no longer allowed access to the API. The give the client access to the API again check out the next commit.
+
 ## 7.2 - Passing an Access Token to Your API
 
 ## 7.3 - Using Access Token Claims When Getting Resources
