@@ -287,6 +287,25 @@ options.TokenValidationParameters = new TokenValidationParameters
 
 ## 5.5 - Role-based Authorization: Using the Role in Your Controllers
 
+Authorize access to a specific action depending on the role:
+
+```
+[Authorize(Roles = "PayingUser")]
+public IActionResult AddImage()
+{
+    return View();
+}
+```
+
+Separate multiple roles with a comma. Add the attribute to the Post metho also:
+
+```
+[HttpPost]
+[ValidateAntiForgeryToken]
+[Authorize(Roles = "PayingUser")]
+public async Task<IActionResult> AddImage(AddImageViewModel addImageViewModel)
+```
+
 ## 5.6 - Creating an Access Denied Page
 
 ## 7.1 - Securing Access to Your API
